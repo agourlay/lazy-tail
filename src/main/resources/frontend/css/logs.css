@@ -1,0 +1,66 @@
+body{
+    background-color: black;
+}
+
+a{
+	text-decoration:none !important;
+}
+
+.main-content {
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-top: 45px;
+    margin-bottom: 25px;
+    color: rgb(215, 215, 215);
+}
+
+.main-menu {
+    position: fixed;
+    background-color: black;
+    z-index: 500;
+    border-bottom: 3px solid #e0e0e0;
+    height: 35px;
+}
+
+.main-menu input{
+    color: grey;
+    margin-right: 15px;
+}
+
+.main-menu input[type=text]{
+    width: 60px;
+}
+
+.pure-menu-heading {
+    color: white !important;
+    font-weight: bold;
+}
+
+.pure-menu-item {
+    color: white;
+}
+
+.pure-menu-list {
+    width: 100%;
+}
+
+.pure-menu a {
+    color: white;
+}
+
+.last-errors {
+
+}
+
+.button-xsmall{
+    font-size: 70%;
+    margin-left: 5px;
+}
+
+.log-ERROR {
+    color: RED;
+}
+
+.log-WARN {
+    color: ORANGE;
+}

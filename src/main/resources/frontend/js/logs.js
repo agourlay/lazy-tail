@@ -48,13 +48,14 @@ function streamOfLogs(minLevel) {
     }, false);
 
     source.addEventListener('open', function(e) {
-        logs.vm.add("Waiting for logs with min level " + minLevel + " ... </br></br>");
+        logs.vm.add("<i>Waiting for logs with min level " + minLevel + " ... </i></br></br>");
          m.render(document.body, logs.view());
     }, false);
 
     source.addEventListener('error', function(e) {
         console.log("Stream of logs error");
         if (e.readyState == EventSource.CLOSED) {
+            logs.vm.add("<i>Log stream closed</i></br></br>");
             console.log("EventSource.CLOSED");
         } else {
             console.dir(e);

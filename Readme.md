@@ -1,7 +1,7 @@
-lazy [![Build Status](https://travis-ci.org/agourlay/lazy-tail.png?branch=master)](https://travis-ci.org/agourlay/lazy-tail)  [ ![Download](https://api.bintray.com/packages/agourlay/maven/lazy-tail/images/download.svg) ](https://bintray.com/agourlay/maven/lazy-tail/_latestVersion)
+lazy-tail [![Build Status](https://travis-ci.org/agourlay/lazy-tail.png?branch=master)](https://travis-ci.org/agourlay/lazy-tail)  [ ![Download](https://api.bintray.com/packages/agourlay/maven/lazy-tail/images/download.svg) ](https://bintray.com/agourlay/maven/lazy-tail/_latestVersion)
 =========
 
-Tired of geeks telling you to SSH into server.prod.bigcoorp to read logfiles, tired of hipsters telling you to set up an Elasticsearch cluster to see some fancy dashboards?
+Tired of geeks telling you to SSH into server.prod.bigcoorp to read log files, tired of hipsters telling you to set up an Elasticsearch cluster to see some fancy dashboards?
 
 Here comes lazy-tail - a library exposing the logs of any host application using Logback to the Web!
 
@@ -17,7 +17,7 @@ Let's start by creating a new instance of the ```LazyTail``` class, as an option
 // starts an HTTP server on the provided port to expose logs.
 def start(port: Int): Unit 
 
-// returns an akka-http Route containing the lazy-tail logic.
+// returns an Akka-http Route containing the lazy-tail logic.
 def route()(implicit system: ActorSystem): server.Route
  
 // returns an Akka-stream Source of LazyLog. 

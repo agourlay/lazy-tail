@@ -84,3 +84,4 @@ case class LazyTail(loggerName: String = "ROOT") {
 
 // IDEAS FRONTEND
 // - min log level should be a SELECT box.
+// - create page lastErrors

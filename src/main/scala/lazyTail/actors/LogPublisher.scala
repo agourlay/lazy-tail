@@ -3,18 +3,20 @@ package lazyTail.actors
 import akka.actor.Props
 import akka.stream.actor.ActorPublisher
 import akka.stream.actor.ActorPublisherMessage.{ Cancel, Request }
-import lazyTail.LazyLog
+import lazyTail.{ LogLevel, LazyLog }
 
-class LogPublisher extends ActorPublisher[LazyLog] {
+class LogPublisher(minLogLevel: LogLevel.LogLevelType) extends ActorPublisher[LazyLog] {
 
   val logs = scala.collection.mutable.Queue.empty[LazyLog]
 
   override def receive: Receive = {
     case log: LazyLog ⇒
-      // drop old logs if Queue gets too big
-      if (logs.size > 500) logs.dequeue()
-      logs.enqueue(log)
-      pushToSub()
+      if (log.level >= minLogLevel) {
+        // drop old logs if Queue gets too big
+        if (logs.size > 500) logs.dequeue()
+        logs.enqueue(log)
+        pushToSub()
+      }
 
     case Request(_) ⇒
       pushToSub()
@@ -31,5 +33,5 @@ class LogPublisher extends ActorPublisher[LazyLog] {
 }
 
 object LogPublisher {
-  def props() = Props(classOf[LogPublisher])
+  def props(minLogLevel: LogLevel.LogLevelType) = Props(classOf[LogPublisher], minLogLevel)
 }

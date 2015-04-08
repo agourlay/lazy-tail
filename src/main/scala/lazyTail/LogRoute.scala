@@ -19,7 +19,7 @@ import spray.json.PrettyPrinter
 
 import scala.concurrent.Future
 
-class LogRoute(sourceOfLogs: ⇒ Future[Source[LazyLog, Unit]], dispatcherActor: ActorRef)
+class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[LazyLog, Unit]], dispatcherActor: ActorRef)
     extends EventStreamMarshalling with Directives with JsonSupport {
 
   implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = {
@@ -39,7 +39,7 @@ class LogRoute(sourceOfLogs: ⇒ Future[Source[LazyLog, Unit]], dispatcherActor:
           parameters('minLevel ? "INFO") { param: String ⇒
             complete {
               LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest -> s"$param is not a valid LogLevel")) { minLogLevel ⇒
-                sourceOfLogs.map { _.filter(_.level >= minLogLevel) }
+                sourceOfLogs(minLogLevel)
               }
             }
           }

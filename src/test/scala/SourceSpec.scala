@@ -1,7 +1,7 @@
 import akka.actor.ActorSystem
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestKit
-import lazyTail.LazyTail
+import lazyTail.{ LogLevel, LazyTail }
 
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
@@ -21,7 +21,7 @@ class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLik
       implicit lazy val mat = ActorFlowMaterializer()
       implicit lazy val ec = system.dispatcher
 
-      val futureSource = LazyTail().source()
+      val futureSource = LazyTail().source(LogLevel.INFO)
       whenReady(futureSource) { s ⇒
         logger.info("catch me if you can")
         // FIXME

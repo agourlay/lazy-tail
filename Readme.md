@@ -1,7 +1,7 @@
-lazy-tail [![Build Status](https://travis-ci.org/agourlay/lazy-tail.png?branch=master)](https://travis-ci.org/agourlay/lazy-tail)  [ ![Download](https://api.bintray.com/packages/agourlay/maven/lazy-tail/images/download.svg) ](https://bintray.com/agourlay/maven/lazy-tail/_latestVersion)
+lazy-tail [![Build Status](https://travis-ci.org/agourlay/lazy-tail.png?branch=master)](https://travis-ci.org/agourlay/lazy-tail)
 =========
 
-Tired of geeks telling you to SSH into server.prod.bigcoorp to read log files, tired of hipsters telling you to set up an Elasticsearch cluster to see some fancy dashboards?
+Tired of geeks telling you to SSH into ```server.prod.bigcoorp``` to read log files, tired of hipsters telling you to set up an Elasticsearch cluster to see some fancy dashboards?
 
 Here comes lazy-tail - a library exposing the logs of any host application using Logback to the Web!
 
@@ -21,7 +21,7 @@ def start(port: Int): Unit
 def route()(implicit system: ActorSystem): server.Route
  
 // returns an Akka-stream Source of LazyLog. 
-def source()(implicit system: ActorSystem): Future[Source[LazyLog, Unit]]  
+def source(minLogLevel: LogLevel)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]]
 ```
 
 ## Endpoints
@@ -31,6 +31,8 @@ def source()(implicit system: ActorSystem): Future[Source[LazyLog, Unit]]
 - /logs/lastErrors to retrieve the last ERROR logs kept in memory.
 
 ## Installation
+
+To be released soon...
 
 ``` scala
 resolvers += "agourlay at bintray" at "http://dl.bintray.com/agourlay/maven"

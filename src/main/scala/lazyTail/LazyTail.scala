@@ -22,11 +22,11 @@ import scala.concurrent.Future
  */
 case class LazyTail(loggerName: String = "ROOT") {
 
-  private def logSource(dispatcherActor: ActorRef)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
+  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
-    (dispatcherActor ? DispatcherActorProtocol.Subscribe).mapTo[LogPublisherRef].map { logPublisher ⇒
+    (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
       Source(ActorPublisher[LazyLog](logPublisher.ref))
     }
   }
@@ -44,7 +44,7 @@ case class LazyTail(loggerName: String = "ROOT") {
 
     val dispatcherActor = system.actorOf(DispatcherActor.props())
     new LazyTailAppender(loggerName, dispatcherActor)
-    val route = new LogRoute(logSource(dispatcherActor), dispatcherActor).build()
+    val route = new LogRoute(logSource(dispatcherActor, _), dispatcherActor).build()
 
     system.actorOf(RestAPI.props(port, route))
   }
@@ -57,7 +57,7 @@ case class LazyTail(loggerName: String = "ROOT") {
   def route()(implicit system: ActorSystem): server.Route = {
     val dispatcherActor = system.actorOf(DispatcherActor.props())
     new LazyTailAppender(loggerName, dispatcherActor)
-    new LogRoute(logSource(dispatcherActor), dispatcherActor).build()
+    new LogRoute(logSource(dispatcherActor, _), dispatcherActor).build()
   }
 
   /**
@@ -65,14 +65,14 @@ case class LazyTail(loggerName: String = "ROOT") {
    * @param system akka-system running the Source
    * @return Future of Source[Log, Unit]
    */
-  def source()(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
+  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
     val dispatcherActor = system.actorOf(DispatcherActor.props())
     new LazyTailAppender(loggerName, dispatcherActor)
 
-    (dispatcherActor ? DispatcherActorProtocol.Subscribe).mapTo[LogPublisherRef].map { logPublisher ⇒
+    (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
       Source(ActorPublisher[LazyLog](logPublisher.ref))
     }
   }

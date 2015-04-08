@@ -16,8 +16,8 @@ class DispatcherActor extends Actor {
         if (errors.size > 100) errors.dequeue()
         errors.enqueue(log)
       }
-    case Subscribe ⇒
-      sender() ! LogPublisherRef(context.actorOf(LogPublisher.props()))
+    case Subscribe(minLogLevel) ⇒
+      sender() ! LogPublisherRef(context.actorOf(LogPublisher.props(minLogLevel)))
     case AskLastErrors ⇒
       sender() ! LastErrors(errors.toVector)
   }
@@ -28,7 +28,7 @@ object DispatcherActor {
 }
 
 object DispatcherActorProtocol {
-  case object Subscribe
+  case class Subscribe(minLogLevel: LogLevel.LogLevelType)
   case object AskLastErrors
   case class LastErrors(lastErrors: Vector[LazyLog])
   case class LogPublisherRef(ref: ActorRef)

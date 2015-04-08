@@ -26,7 +26,7 @@ object LazyLog {
     val baseDisplay = s"$formattedDate <span class='log-${e.getLevel}'> ${e.getLevel} </span> ${e.getLoggerName} ${e.getFormattedMessage}"
     val exceptionOpts = if (e.getThrowableProxy == null) None else Some(ExceptionInfo.fromLogback(e.getThrowableProxy))
     val logDisplay = exceptionOpts.fold(baseDisplay) { eInfo ⇒
-      baseDisplay + " </br> " + s"${eInfo.className} ${eInfo.message} </br> " + " &nbsp&nbsp " + eInfo.stacktrace.mkString(" </br> &nbsp&nbsp ")
+      baseDisplay + s" </br> ${eInfo.className} ${eInfo.message} </br> &nbsp&nbsp " + eInfo.stacktrace.mkString(" </br> &nbsp&nbsp ")
     }
 
     LazyLog(

@@ -9,7 +9,7 @@ Here comes lazy-tail - a library exposing the logs of any host application using
 
 ## APIs
 
-Let's start by creating a new instance of the ```LazyTail``` class, as an optional argument it takes the LoggerName you want to expose. (by default "ROOT")
+Let's start by creating an instance of the ```LazyTail``` class, as an optional argument it takes the LoggerName you want to expose. (by default "ROOT")
 
 3 alternatives are currently available:
 
@@ -33,6 +33,8 @@ def source(minLogLevel: LogLevel)(implicit system: ActorSystem): Future[Source[L
 ## Installation
 
 To be released soon...
+
+lazy-tail depends on akka-http 1.0-M5.
 
 ``` scala
 resolvers += "agourlay at bintray" at "http://dl.bintray.com/agourlay/maven"

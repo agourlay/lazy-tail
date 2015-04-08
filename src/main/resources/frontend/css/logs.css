@@ -22,9 +22,9 @@ a{
     height: 35px;
 }
 
-.main-menu input{
+.main-menu input, .main-menu select{
     color: grey;
-    margin-right: 15px;
+    margin-right: 45px;
 }
 
 .main-menu input[type=text]{
@@ -34,6 +34,7 @@ a{
 .pure-menu-heading {
     color: white !important;
     font-weight: bold;
+    margin-right: 20px;
 }
 
 .pure-menu-item {

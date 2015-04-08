@@ -83,5 +83,4 @@ case class LazyTail(loggerName: String = "ROOT") {
 // - websocket support (wait 4 akka-http)
 
 // IDEAS FRONTEND
-// - min log level should be a SELECT box.
 // - create page lastErrors

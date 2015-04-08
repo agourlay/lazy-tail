@@ -21,8 +21,15 @@ logs.vm = {
         logs.vm.stream = function(){
             streamOfLogs(logs.vm.minLogLevel());
         };
-        this.minLogLevel = m.prop('INFO');
-        this.followLogs = m.prop(false);
+        this.minLogLevel = m.prop('TRACE');
+        this.logLevelOptions = m.prop([
+            { value: 'TRACE', text: 'TRACE' },
+            { value: 'DEBUG', text: 'DEBUG' },
+            { value: 'INFO', text: 'INFO' },
+            { value: 'WARN', text: 'WARN' },
+            { value: 'ERROR', text: 'ERROR' }
+        ]);
+        this.followLogs = m.prop(true);
         this.bufferSize = m.prop(500);
         this.sseSource = m.prop(null);
         logs.vm.getLastErrors = function(){
@@ -48,7 +55,7 @@ function streamOfLogs(minLevel) {
     }, false);
 
     source.addEventListener('open', function(e) {
-        logs.vm.add("<i>Waiting for logs with min level " + minLevel + " ... </i></br></br>");
+        logs.vm.add("</br><i>Waiting for logs with min level " + minLevel + " ... </i></br></br>");
          m.render(document.body, logs.view());
     }, false);
 
@@ -77,11 +84,19 @@ var menu = function() {
                     m("label","follow logs: "),
                     m("input[type=checkbox]", {onclick: m.withAttr("checked", logs.vm.followLogs), checked: logs.vm.followLogs()}),
                     m("label","min log level: "),
-                    m("input[type=text]" , {onchange: m.withAttr("value", logs.vm.minLogLevel), value: logs.vm.minLogLevel()}),
-                    m("button.button-xsmall.pure-button-primary.pure-button", {onclick: logs.vm.stream}, "Subscribe")
+                    m("select", {
+                        onchange: function(){
+                            logs.vm.minLogLevel(this.value);
+                            logs.vm.stream();
+                        },
+                        value: logs.vm.minLogLevel }, [
+                        logs.vm.logLevelOptions().map(function(opt) {
+                            return m('option', {value: opt.value}, opt.text);
+                        })
+                    ])
                 ]),
                 m("li", {class: "pure-menu-item"}, [
-                    m("a[href='/logs/lastErrors']",{class: "pure-menu-link"}, "see_last_errors"),
+                    m("a[href='/logs/lastErrors']",{class: "pure-menu-link"}, "last errors"),
                 ])
             ])
         ])

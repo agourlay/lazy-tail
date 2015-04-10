@@ -96,7 +96,7 @@ var menu = function() {
                     ])
                 ]),
                 m("li", {class: "pure-menu-item"}, [
-                    m("a[href='/logs/lastErrors']",{class: "pure-menu-link"}, "last errors"),
+                    m("a[href='/logs/lastErrors.html'][target='_blank']",{class: "pure-menu-link"}, "last errors"),
                 ])
             ])
         ])

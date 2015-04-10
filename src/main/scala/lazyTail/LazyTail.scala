@@ -77,10 +77,3 @@ case class LazyTail(loggerName: String = "ROOT") {
     }
   }
 }
-
-// IDEAS BACKEND
-// - retrieve/specify log pattern
-// - websocket support (wait 4 akka-http)
-
-// IDEAS FRONTEND
-// - create page lastErrors

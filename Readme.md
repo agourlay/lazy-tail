@@ -45,3 +45,7 @@ libraryDependencies ++= List(
 )
 ```
 
+## Todos
+
+- Websocket support when available in Akka-http.
+- retrieve/specify a log pattern for the display field of the log.

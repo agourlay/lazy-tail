@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.marshalling.ToResponseMarshallable
+import akka.http.model.{ MediaTypes, HttpEntity, HttpResponse }
 import akka.pattern._
 import akka.http.model.StatusCodes._
 import akka.stream.scaladsl.Source
@@ -23,7 +24,7 @@ class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[LazyLog, Un
     extends EventStreamMarshalling with Directives with JsonSupport {
 
   implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = {
-    ServerSentEvent(event = "log", data = PrettyPrinter(formatLog.write(log)))
+    ServerSentEvent(eventType = "log", data = PrettyPrinter(formatLog.write(log)))
   }
 
   def build()(implicit system: ActorSystem) = {
@@ -39,18 +40,39 @@ class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[LazyLog, Un
           parameters('minLevel ? "INFO") { param: String ⇒
             complete {
               LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest -> s"$param is not a valid LogLevel")) { minLogLevel ⇒
-                sourceOfLogs(minLogLevel)
+                // TODO why is the implicit not picked up?
+                sourceOfLogs(minLogLevel).map(_.map(flowEventToSseMessage))
               }
             }
           }
         }
       } ~
         get {
-          path("lastErrors") {
+          path("lastErrors.html") {
             onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
-              complete(ToResponseMarshallable(OK -> container.lastErrors))
+              complete(
+                HttpResponse(
+                  //TODO so lazy...try Twirl or Scalate
+                  entity = HttpEntity(MediaTypes.`text/html`,
+                    "<html>" +
+                      "<head>" +
+                      "<link rel='stylesheet' href='/logs/css/pure-min.css'/>" +
+                      "<link rel='stylesheet' href='/logs/css/logs.css'/>" +
+                      "</head>" +
+                      "<body>" +
+                      "<div class='main-content'>" +
+                      container.lastErrors.map(_.htmlLog).mkString("</br>") +
+                      "</div>" +
+                      "</body>" +
+                      "</html>"))
+              )
             }
-          }
+          } ~
+            path("lastErrors") {
+              onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
+                complete(ToResponseMarshallable(OK -> container.lastErrors))
+              }
+            }
         } ~
         pathEndOrSingleSlash {
           respondWithHeader(`Cache-Control`(`public`, `max-age`(maxAge))) {

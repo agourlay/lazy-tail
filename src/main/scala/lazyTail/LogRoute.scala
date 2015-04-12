@@ -20,68 +20,68 @@ import spray.json.PrettyPrinter
 
 import scala.concurrent.Future
 
-class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[LazyLog, Unit]], dispatcherActor: ActorRef)
+case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[LazyLog, Unit]], dispatcherActor: ActorRef)(implicit system: ActorSystem)
     extends EventStreamMarshalling with Directives with JsonSupport {
 
+  implicit val ec = system.dispatcher
+  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
   implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = {
-    ServerSentEvent(eventType = "log", data = PrettyPrinter(formatLog.write(log)))
+    ServerSentEvent(PrettyPrinter(formatLog.write(log)), "log")
   }
 
-  def build()(implicit system: ActorSystem) = {
-    implicit val ec = system.dispatcher
-    implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+  val maxAge = 60L * 60L * 24L * 31L
 
-    val maxAge = 60L * 60L * 24L * 31L
-
-    pathPrefix("logs") {
-      get {
-        path("tail") {
-          //TODO serialize directly as enum as in Spray
-          parameters('minLevel ? "INFO") { param: String ⇒
-            complete {
-              LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest -> s"$param is not a valid LogLevel")) { minLogLevel ⇒
-                // TODO why is the implicit not picked up?
-                sourceOfLogs(minLogLevel).map(_.map(flowEventToSseMessage))
-              }
+  val route = pathPrefix("logs") {
+    get {
+      path("tail") {
+        //TODO serialize directly as enum as in Spray
+        parameters('minLevel ? "INFO") { param: String ⇒
+          complete {
+            LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest -> s"$param is not a valid LogLevel")) { minLogLevel ⇒
+              // TODO why is the implicit not picked up?
+              sourceOfLogs(minLogLevel)
             }
           }
+        }
+      }
+    } ~
+      get {
+        path("lastErrors.html") {
+          onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
+            complete(
+              HttpResponse(
+                //TODO so lazy...try Twirl or Scalate
+                entity = HttpEntity(MediaTypes.`text/html`,
+                  s"""
+                      <html>
+                      <head>
+                      <link rel='stylesheet' href='/logs/css/pure-min.css'/>
+                      <link rel='stylesheet' href='/logs/css/logs.css'/>
+                      </head>
+                      <body>
+                      <div class='main-content'>
+                      ${container.lastErrors.map(_.htmlLog).mkString("</br>")}
+                      </div>
+                      </body>
+                      </html>
+                     """))
+            )
+          }
+        } ~
+          path("lastErrors") {
+            onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
+              complete(ToResponseMarshallable(OK -> container.lastErrors))
+            }
+          }
+      } ~
+      pathEndOrSingleSlash {
+        respondWithHeader(`Cache-Control`(`public`, `max-age`(maxAge))) {
+          getFromResource("frontend/logs.html")
         }
       } ~
-        get {
-          path("lastErrors.html") {
-            onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
-              complete(
-                HttpResponse(
-                  //TODO so lazy...try Twirl or Scalate
-                  entity = HttpEntity(MediaTypes.`text/html`,
-                    "<html>" +
-                      "<head>" +
-                      "<link rel='stylesheet' href='/logs/css/pure-min.css'/>" +
-                      "<link rel='stylesheet' href='/logs/css/logs.css'/>" +
-                      "</head>" +
-                      "<body>" +
-                      "<div class='main-content'>" +
-                      container.lastErrors.map(_.htmlLog).mkString("</br>") +
-                      "</div>" +
-                      "</body>" +
-                      "</html>"))
-              )
-            }
-          } ~
-            path("lastErrors") {
-              onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
-                complete(ToResponseMarshallable(OK -> container.lastErrors))
-              }
-            }
-        } ~
-        pathEndOrSingleSlash {
-          respondWithHeader(`Cache-Control`(`public`, `max-age`(maxAge))) {
-            getFromResource("frontend/logs.html")
-          }
-        } ~
-        respondWithHeader(`Cache-Control`(`public`, `max-age`(maxAge))) {
-          getFromResourceDirectory("frontend")
-        }
-    }
+      respondWithHeader(`Cache-Control`(`public`, `max-age`(maxAge))) {
+        getFromResourceDirectory("frontend")
+      }
   }
+
 }

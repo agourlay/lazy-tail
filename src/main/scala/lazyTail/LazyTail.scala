@@ -44,9 +44,9 @@ case class LazyTail(loggerName: String = "ROOT") {
 
     val dispatcherActor = system.actorOf(DispatcherActor.props())
     new LazyTailAppender(loggerName, dispatcherActor)
-    val route = new LogRoute(logSource(dispatcherActor, _), dispatcherActor).build()
+    val logRoute = LogRoute(logSource(dispatcherActor, _), dispatcherActor)
 
-    system.actorOf(RestAPI.props(port, route))
+    system.actorOf(RestAPI.props(port, logRoute.route))
   }
 
   /**
@@ -56,8 +56,8 @@ case class LazyTail(loggerName: String = "ROOT") {
    */
   def route()(implicit system: ActorSystem): server.Route = {
     val dispatcherActor = system.actorOf(DispatcherActor.props())
-    new LazyTailAppender(loggerName, dispatcherActor)
-    new LogRoute(logSource(dispatcherActor, _), dispatcherActor).build()
+    LazyTailAppender(loggerName, dispatcherActor)
+    LogRoute(logSource(dispatcherActor, _), dispatcherActor).route
   }
 
   /**
@@ -70,7 +70,7 @@ case class LazyTail(loggerName: String = "ROOT") {
     implicit val ec = system.dispatcher
 
     val dispatcherActor = system.actorOf(DispatcherActor.props())
-    new LazyTailAppender(loggerName, dispatcherActor)
+    LazyTailAppender(loggerName, dispatcherActor)
 
     (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
       Source(ActorPublisher[LazyLog](logPublisher.ref))

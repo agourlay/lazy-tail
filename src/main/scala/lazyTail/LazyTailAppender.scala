@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import org.slf4j.LoggerFactory
 
-class LazyTailAppender(loggerName: String, dispatcherActor: ActorRef) {
+case class LazyTailAppender(loggerName: String, dispatcherActor: ActorRef) {
 
   val lc = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
 

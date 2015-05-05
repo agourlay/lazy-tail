@@ -32,13 +32,13 @@ def route()(implicit system: ActorSystem): server.Route
 
 To be released soon...
 
-lazy-tail depends on akka-http 1.0-M5.
+lazy-tail depends on akka-http 1.0-RC2.
 
 ``` scala
 resolvers += "agourlay at bintray" at "http://dl.bintray.com/agourlay/maven"
 
 libraryDependencies ++= List(
-  "com.github.agourlay" %% "lazy-tail" % "0.1",
+  "com.github.agourlay" %% "lazy-tail" % "0.1.1",
   ...
 )
 ```

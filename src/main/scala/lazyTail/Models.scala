@@ -3,9 +3,10 @@ package lazyTail
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import akka.http.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import ch.qos.logback.classic.spi.{ IThrowableProxy, ILoggingEvent }
-import spray.json.{ JsValue, JsString, RootJsonFormat, DefaultJsonProtocol }
+import de.heikoseeberger.akkasse.ServerSentEvent
+import spray.json._
 
 case class LazyLog(
   threadName: String,
@@ -17,7 +18,7 @@ case class LazyLog(
   htmlLog: String,
   exceptionInfo: Option[ExceptionInfo] = None)
 
-object LazyLog {
+object LazyLog extends JsonSupport {
 
   val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
@@ -39,6 +40,12 @@ object LazyLog {
       htmlLog = logDisplay,
       exceptionInfo = exceptionOpts
     )
+  }
+
+  private val toJson = implicitly[RootJsonFormat[LazyLog]]
+
+  implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = {
+    ServerSentEvent(PrettyPrinter(toJson.write(log)), "log")
   }
 }
 

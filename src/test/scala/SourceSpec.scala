@@ -9,6 +9,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.scalatest.time.{ Millis, Span }
 import org.slf4j.LoggerFactory
+import spray.json.{ JsString, JsonParser }
 
 class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLike with Matchers with ScalaFutures with Eventually with BeforeAndAfterAll {
   def this() = this(ActorSystem("MySpec"))
@@ -31,7 +32,7 @@ class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLik
         logger.info("catch me if you can")
 
         whenReady(process) { log ⇒
-          log.formattedMessage should equal("catch me if you can")
+          JsonParser(log.data).asJsObject.getFields("formattedMessage").head should equal(JsString("catch me if you can"))
         }
       }
     }

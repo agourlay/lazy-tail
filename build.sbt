@@ -36,16 +36,16 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(RewriteArrowSymbols, true)
 
 libraryDependencies ++= {
-  val akkaV      = "2.3.9"
-  val akkaHttpV  = "1.0-M5"
-  val akkaSseV   = "0.8.0"
+  val akkaV      = "2.3.10"
+  val akkaHttpV  = "1.0-RC2"
+  val akkaSseV   = "0.12.0"
   val sprayJsonV = "1.3.1"
   val logbackV   = "1.1.3"
   val scalaTestV = "2.2.4"
   Seq(
     "com.typesafe.akka"  %% "akka-actor"                        % akkaV
     ,"com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaHttpV
-    ,"com.typesafe.akka" %% "akka-http-experimental"            % akkaHttpV
+    ,"com.typesafe.akka" %% "akka-http-scala-experimental"      % akkaHttpV
     ,"de.heikoseeberger" %% "akka-sse"                          % akkaSseV
     ,"io.spray"          %% "spray-json"                        % sprayJsonV
     ,"ch.qos.logback"    %  "logback-classic"                   % logbackV

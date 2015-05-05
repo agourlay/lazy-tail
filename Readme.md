@@ -11,7 +11,7 @@ Here comes lazy-tail - a library exposing the logs of any host application using
 
 Let's start by creating an instance of the ```LazyTail``` class, as an optional argument it takes the LoggerName you want to expose. (by default "ROOT")
 
-3 alternatives are currently available:
+2 alternatives are currently available:
 
 ```scala
 // starts an HTTP server on the provided port to expose logs.
@@ -20,8 +20,6 @@ def start(port: Int): Unit
 // returns an Akka-http Route containing the lazy-tail logic.
 def route()(implicit system: ActorSystem): server.Route
  
-// returns an Akka-stream Source of LazyLog. 
-def source(minLogLevel: LogLevel)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]]
 ```
 
 ## Endpoints

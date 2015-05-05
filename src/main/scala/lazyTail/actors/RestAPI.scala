@@ -1,7 +1,7 @@
 package lazyTail.actors
 
 import akka.actor.{ Actor, ActorSystem, Props }
-import akka.http.{ Http, server }
+import akka.http.scaladsl.{ Http, server }
 import akka.stream.ActorFlowMaterializer
 
 class RestAPI(logPort: Int, route: server.Route, system: ActorSystem, fm: ActorFlowMaterializer) extends Actor {

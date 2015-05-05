@@ -4,11 +4,12 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern._
-import akka.http.server
+import akka.http.scaladsl.server
 import akka.stream.ActorFlowMaterializer
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import de.heikoseeberger.akkasse.ServerSentEvent
 import lazyTail.actors.{ RestAPI, DispatcherActor, DispatcherActorProtocol }
 import DispatcherActorProtocol.LogPublisherRef
 import org.slf4j.LoggerFactory
@@ -22,12 +23,12 @@ import scala.concurrent.Future
  */
 case class LazyTail(loggerName: String = "ROOT") {
 
-  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
+  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[ServerSentEvent, Unit]] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
     (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[LazyLog](logPublisher.ref))
+      Source(ActorPublisher[ServerSentEvent](logPublisher.ref))
     }
   }
 
@@ -65,7 +66,7 @@ case class LazyTail(loggerName: String = "ROOT") {
    * @param system akka-system running the Source
    * @return Future of Source[Log, Unit]
    */
-  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[LazyLog, Unit]] = {
+  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[ServerSentEvent, Unit]] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
@@ -73,7 +74,7 @@ case class LazyTail(loggerName: String = "ROOT") {
     LazyTailAppender(loggerName, dispatcherActor)
 
     (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[LazyLog](logPublisher.ref))
+      Source(ActorPublisher[ServerSentEvent](logPublisher.ref))
     }
   }
 }

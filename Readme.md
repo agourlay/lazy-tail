@@ -11,7 +11,7 @@ Here comes lazy-tail - a library exposing the logs of any host application using
 
 Let's start by creating an instance of the ```LazyTail``` class, as an optional argument it takes the LoggerName you want to expose. (by default "ROOT")
 
-2 alternatives are currently available:
+then 2 alternatives are currently available:
 
 ```scala
 // starts an HTTP server on the provided port to expose logs.

@@ -7,8 +7,6 @@ import scala.concurrent.duration.DurationInt
 
 class LogPublisher(minLogLevel: LogLevel.LogLevelType) extends EventPublisher[LazyLog](500, 1 second) with JsonSupport {
 
-  val logs = scala.collection.mutable.Queue.empty[LazyLog]
-
   override protected def receiveEvent = {
     case log: LazyLog ⇒
       if (log.level >= minLogLevel) {

@@ -118,5 +118,5 @@ logs.controller = function() {
     logs.vm.init()
 }
 
-m.module(document.body, {controller: logs.controller, view: logs.view});
+m.mount(document.body, {controller: logs.controller, view: logs.view});
 logs.vm.stream();

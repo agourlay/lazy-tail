@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestKit
-import com.github.agourlay.lazyTail.{LazyTail, LogLevel}
+import com.github.agourlay.lazyTail.{ LazyTail, LogLevel }
 import org.scalatest._
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.slf4j.LoggerFactory
-import spray.json.{JsString, JsonParser}
+import spray.json.{ JsString, JsonParser }
 
 class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLike with Matchers with ScalaFutures with Eventually with BeforeAndAfterAll {
   def this() = this(ActorSystem("MySpec"))

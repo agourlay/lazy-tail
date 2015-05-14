@@ -1,4 +1,4 @@
-package lazyTail
+package com.github.agourlay.lazyTail
 
 import java.util.concurrent.TimeUnit
 
@@ -14,7 +14,7 @@ import akka.http.scaladsl.model.headers.CacheDirectives._
 import akka.util.Timeout
 
 import de.heikoseeberger.akkasse.{ ServerSentEvent, EventStreamMarshalling }
-import lazyTail.actors.DispatcherActorProtocol
+import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol
 import DispatcherActorProtocol.{ LastErrors, AskLastErrors }
 
 import scala.concurrent.Future

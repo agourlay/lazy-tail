@@ -1,4 +1,4 @@
-package lazyTail
+package com.github.agourlay.lazyTail
 
 import java.text.SimpleDateFormat
 import java.util.Date

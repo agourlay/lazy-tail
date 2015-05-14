@@ -1,4 +1,4 @@
-package lazyTail.actors
+package com.github.agourlay.lazyTail.actors
 
 import akka.actor.{ Actor, ActorSystem, Props }
 import akka.http.scaladsl.{ Http, server }

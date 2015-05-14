@@ -1,4 +1,4 @@
-package lazyTail
+package com.github.agourlay.lazyTail
 
 import java.util.concurrent.TimeUnit
 
@@ -10,7 +10,7 @@ import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import de.heikoseeberger.akkasse.ServerSentEvent
-import lazyTail.actors.{ RestAPI, DispatcherActor, DispatcherActorProtocol }
+import com.github.agourlay.lazyTail.actors.{ RestAPI, DispatcherActor, DispatcherActorProtocol }
 import DispatcherActorProtocol.LogPublisherRef
 import org.slf4j.LoggerFactory
 

@@ -1,4 +1,4 @@
-package lazyTail
+package com.github.agourlay.lazyTail
 
 import akka.actor.ActorRef
 import ch.qos.logback.classic.LoggerContext

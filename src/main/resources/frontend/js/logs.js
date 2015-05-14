@@ -79,7 +79,7 @@ var menu = function() {
             m("a[href='/logs']",{class: "pure-menu-heading pure-menu-link"}, "Lazytail"),
             m("ul", {class: "pure-menu-list"},[
                 m("li", {class: "pure-menu-item"}, [
-                    m("label","buffer size: "),
+                    m("label","display buffer size: "),
                     m("input[type=text]" , {onchange: m.withAttr("value", logs.vm.bufferSize), value: logs.vm.bufferSize()}),
                     m("label","follow logs: "),
                     m("input[type=checkbox]", {onclick: m.withAttr("checked", logs.vm.followLogs), checked: logs.vm.followLogs()}),

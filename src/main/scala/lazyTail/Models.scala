@@ -15,8 +15,7 @@ case class LazyLog(
   formattedMessage: String,
   loggerName: String,
   timestamp: Long,
-  htmlLog: String,
-  exceptionInfo: Option[ExceptionInfo] = None)
+  htmlLog: String)
 
 object LazyLog extends JsonSupport {
 
@@ -27,7 +26,7 @@ object LazyLog extends JsonSupport {
     val baseDisplay = s"$formattedDate <span class='log-${e.getLevel}'> ${e.getLevel} </span> ${e.getLoggerName} ${e.getFormattedMessage}"
     val exceptionOpts = if (e.getThrowableProxy == null) None else Some(ExceptionInfo.fromLogback(e.getThrowableProxy))
     val logDisplay = exceptionOpts.fold(baseDisplay) { eInfo ⇒
-      baseDisplay + s" </br> ${eInfo.className} ${eInfo.message} </br> &nbsp&nbsp " + eInfo.stacktrace.mkString(" </br> &nbsp&nbsp ")
+      baseDisplay + " </br> " + displayFullStacktrace(eInfo)
     }
 
     LazyLog(
@@ -37,9 +36,17 @@ object LazyLog extends JsonSupport {
       formattedMessage = e.getFormattedMessage,
       loggerName = e.getLoggerName,
       timestamp = e.getTimeStamp,
-      htmlLog = logDisplay,
-      exceptionInfo = exceptionOpts
+      htmlLog = logDisplay
     )
+  }
+
+  private def displayFullStacktrace(eInfo: ExceptionInfo): String = {
+    val causes = eInfo.accumulateCauses()
+    displaySingleException(eInfo: ExceptionInfo) + "</br>Caused by: " + causes.map(displaySingleException).mkString("</br>Caused by: ")
+  }
+
+  private def displaySingleException(eInfo: ExceptionInfo): String = {
+    s"${eInfo.className} ${eInfo.message} </br> &nbsp&nbsp " + eInfo.stacktrace.mkString(" </br> &nbsp&nbsp ")
   }
 
   private val toJson = implicitly[RootJsonFormat[LazyLog]]
@@ -50,18 +57,27 @@ object LazyLog extends JsonSupport {
 }
 
 case class ExceptionInfo(
-  message: String,
-  className: String,
-  stacktrace: Vector[String])
+    message: String,
+    className: String,
+    stacktrace: Vector[String],
+    cause: Option[ExceptionInfo] = None) {
+
+  def accumulateCauses(): Vector[ExceptionInfo] = {
+    def loopAccumulateCauses(eInfo: ExceptionInfo, causes: Vector[ExceptionInfo]): Vector[ExceptionInfo] = {
+      eInfo.cause.fold(causes) { cause ⇒ loopAccumulateCauses(cause, causes :+ cause) }
+    }
+    loopAccumulateCauses(this, Vector.empty[ExceptionInfo])
+  }
+}
 
 object ExceptionInfo {
-  def fromLogback(proxy: IThrowableProxy): ExceptionInfo = {
+  def fromLogback(proxy: IThrowableProxy): ExceptionInfo =
     ExceptionInfo(
       message = proxy.getMessage,
       className = proxy.getClassName,
-      stacktrace = proxy.getStackTraceElementProxyArray.toVector.map(_.getSTEAsString)
+      stacktrace = proxy.getStackTraceElementProxyArray.toVector.map(_.getSTEAsString),
+      cause = if (proxy.getCause == null) None else Some(fromLogback(proxy.getCause))
     )
-  }
 }
 
 object LogLevel extends Enumeration {
@@ -81,6 +97,5 @@ trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
     def write(obj: LogLevel.LogLevelType) = JsString(obj.toString)
     def read(json: JsValue): LogLevel.LogLevelType = LogLevel.withName(json.prettyPrint)
   }
-  implicit val formatExceptionInfo = jsonFormat3(ExceptionInfo.apply)
-  implicit val formatLog = jsonFormat8(LazyLog.apply)
+  implicit val formatLog = jsonFormat7(LazyLog.apply)
 }

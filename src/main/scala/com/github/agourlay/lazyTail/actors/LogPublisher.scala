@@ -1,8 +1,9 @@
 package com.github.agourlay.lazyTail.actors
 
 import akka.actor.Props
+import com.github.agourlay.lazyTail.{ JsonSupport, LazyLog, LogLevel }
 import de.heikoseeberger.akkasse._
-import com.github.agourlay.lazyTail.{ JsonSupport, LogLevel, LazyLog }
+
 import scala.concurrent.duration.DurationInt
 
 class LogPublisher(minLogLevel: LogLevel.LogLevelType) extends EventPublisher[LazyLog](500, 1 second) with JsonSupport {

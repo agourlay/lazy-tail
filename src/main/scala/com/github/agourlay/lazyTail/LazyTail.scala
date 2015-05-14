@@ -3,15 +3,15 @@ package com.github.agourlay.lazyTail
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.pattern._
 import akka.http.scaladsl.server
+import akka.pattern._
 import akka.stream.ActorFlowMaterializer
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol.LogPublisherRef
+import com.github.agourlay.lazyTail.actors.{ DispatcherActor, DispatcherActorProtocol, RestAPI }
 import de.heikoseeberger.akkasse.ServerSentEvent
-import com.github.agourlay.lazyTail.actors.{ RestAPI, DispatcherActor, DispatcherActorProtocol }
-import DispatcherActorProtocol.LogPublisherRef
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future

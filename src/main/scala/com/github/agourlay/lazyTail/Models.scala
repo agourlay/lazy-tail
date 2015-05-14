@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import ch.qos.logback.classic.spi.{ IThrowableProxy, ILoggingEvent }
+import ch.qos.logback.classic.spi.{ ILoggingEvent, IThrowableProxy }
 import de.heikoseeberger.akkasse.ServerSentEvent
 import spray.json._
 
@@ -25,9 +25,7 @@ object LazyLog extends JsonSupport {
     val formattedDate = sdf.format(new Date(e.getTimeStamp))
     val baseDisplay = s"$formattedDate <span class='log-${e.getLevel}'> ${e.getLevel} </span> ${e.getLoggerName} ${e.getFormattedMessage}"
     val exceptionOpts = if (e.getThrowableProxy == null) None else Some(ExceptionInfo.fromLogback(e.getThrowableProxy))
-    val logDisplay = exceptionOpts.fold(baseDisplay) { eInfo ⇒
-      baseDisplay + " </br> " + displayFullStacktrace(eInfo)
-    }
+    val logDisplay = exceptionOpts.fold(baseDisplay) { baseDisplay + " </br> " + displayFullStacktrace(_) }
 
     LazyLog(
       threadName = e.getThreadName,
@@ -45,15 +43,12 @@ object LazyLog extends JsonSupport {
     displaySingleException(eInfo: ExceptionInfo) + "</br>Caused by: " + causes.map(displaySingleException).mkString("</br>Caused by: ")
   }
 
-  private def displaySingleException(eInfo: ExceptionInfo): String = {
+  private def displaySingleException(eInfo: ExceptionInfo): String =
     s"${eInfo.className} ${eInfo.message} </br> &nbsp&nbsp " + eInfo.stacktrace.mkString(" </br> &nbsp&nbsp ")
-  }
 
   private val toJson = implicitly[RootJsonFormat[LazyLog]]
 
-  implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = {
-    ServerSentEvent(PrettyPrinter(toJson.write(log)), "log")
-  }
+  implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = ServerSentEvent(PrettyPrinter(toJson.write(log)), "log")
 }
 
 case class ExceptionInfo(
@@ -63,9 +58,9 @@ case class ExceptionInfo(
     cause: Option[ExceptionInfo] = None) {
 
   def accumulateCauses(): Vector[ExceptionInfo] = {
-    def loopAccumulateCauses(eInfo: ExceptionInfo, causes: Vector[ExceptionInfo]): Vector[ExceptionInfo] = {
+    def loopAccumulateCauses(eInfo: ExceptionInfo, causes: Vector[ExceptionInfo]): Vector[ExceptionInfo] =
       eInfo.cause.fold(causes) { cause ⇒ loopAccumulateCauses(cause, causes :+ cause) }
-    }
+
     loopAccumulateCauses(this, Vector.empty[ExceptionInfo])
   }
 }

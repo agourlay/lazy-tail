@@ -4,18 +4,16 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ MediaTypes, HttpEntity, HttpResponse }
-import akka.pattern._
 import akka.http.scaladsl.model.StatusCodes._
-import akka.stream.scaladsl.Source
-import akka.http.scaladsl.server._
-import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.headers.CacheDirectives._
+import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, MediaTypes }
+import akka.http.scaladsl.server._
+import akka.pattern._
+import akka.stream.scaladsl.Source
 import akka.util.Timeout
-
-import de.heikoseeberger.akkasse.{ ServerSentEvent, EventStreamMarshalling }
-import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol
-import DispatcherActorProtocol.{ LastErrors, AskLastErrors }
+import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol.{ AskLastErrors, LastErrors }
+import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
 
 import scala.concurrent.Future
 
@@ -78,5 +76,4 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[Server
         getFromResourceDirectory("frontend")
       }
   }
-
 }

@@ -44,4 +44,4 @@ libraryDependencies ++= List(
 ## Todos
 
 - retrieve/specify a log pattern for the display format of the log.
-- statistics about errors (frequency by type, rate 1-5-15...)
+- statistics about errors (frequency by type, rate 1-5-15 ...)

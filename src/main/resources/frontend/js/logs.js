@@ -47,8 +47,9 @@ function streamOfLogs(minLevel) {
     }
     var source = new EventSource("logs/tail?minLevel="+minLevel);
     source.addEventListener('log', function(e) {
+        m.startComputation();
         logs.vm.add(JSON.parse(e.data).htmlLog);
-        m.render(document.body, logs.view());
+        m.endComputation();
         if (logs.vm.followLogs()){
             window.scrollTo(0,document.body.scrollHeight);
         }
@@ -115,7 +116,7 @@ logs.view = function() {
 };
 
 logs.controller = function() {
-    logs.vm.init()
+    logs.vm.init();
 }
 
 m.mount(document.body, {controller: logs.controller, view: logs.view});

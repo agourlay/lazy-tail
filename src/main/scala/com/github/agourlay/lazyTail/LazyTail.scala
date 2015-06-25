@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.server
 import akka.pattern._
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
@@ -38,7 +38,7 @@ case class LazyTail(loggerName: String = "ROOT") {
    */
   def start(port: Int): Unit = {
     implicit lazy val system = ActorSystem("lazy-tail")
-    implicit lazy val mat = ActorFlowMaterializer()
+    implicit lazy val mat = ActorMaterializer()
     sys.addShutdownHook(system.shutdown())
 
     LoggerFactory.getLogger("LazyTail").info(s"Starting lazyTail on port $port")

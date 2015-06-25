@@ -1,7 +1,7 @@
 package com.github.agourlay
 
 import akka.actor.ActorSystem
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestKit
 import com.github.agourlay.lazyTail.{ LazyTail, LogLevel }
@@ -21,7 +21,7 @@ class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLik
 
   "Source API" must {
     "return Source" in {
-      implicit lazy val mat = ActorFlowMaterializer()
+      implicit lazy val mat = ActorMaterializer()
       implicit lazy val ec = system.dispatcher
 
       val futureSource = LazyTail().source(LogLevel.INFO)

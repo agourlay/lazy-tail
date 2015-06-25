@@ -10,7 +10,7 @@ version := "0.2-SNAPSHOT"
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 scalacOptions := Seq(
   "-unchecked",
@@ -37,8 +37,8 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
 
 libraryDependencies ++= {
   val akkaV      = "2.3.11"
-  val akkaHttpV  = "1.0-RC3"
-  val akkaSseV   = "0.13.0"
+  val akkaHttpV  = "1.0-RC4"
+  val akkaSseV   = "0.14.0"
   val sprayJsonV = "1.3.2"
   val logbackV   = "1.1.3"
   val scalaTestV = "2.2.5"

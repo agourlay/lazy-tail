@@ -2,9 +2,9 @@ package com.github.agourlay.lazyTail.actors
 
 import akka.actor.{ Actor, ActorSystem, Props }
 import akka.http.scaladsl.{ Http, server }
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 
-class RestAPI(logPort: Int, route: server.Route, system: ActorSystem, fm: ActorFlowMaterializer) extends Actor {
+class RestAPI(logPort: Int, route: server.Route, system: ActorSystem, fm: ActorMaterializer) extends Actor {
   implicit val executionContext = system.dispatcher
   implicit val ifm = fm
 
@@ -14,6 +14,6 @@ class RestAPI(logPort: Int, route: server.Route, system: ActorSystem, fm: ActorF
 }
 
 object RestAPI {
-  def props(port: Int, route: server.Route)(implicit system: ActorSystem, fm: ActorFlowMaterializer) =
+  def props(port: Int, route: server.Route)(implicit system: ActorSystem, fm: ActorMaterializer) =
     Props(classOf[RestAPI], port, route, system, fm)
 }

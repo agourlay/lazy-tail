@@ -1,7 +1,5 @@
 import scalariform.formatter.preferences._
 
-import bintray.Plugin._
-
 name := "lazy-tail"
 
 organization := "com.github.agourlay"
@@ -32,7 +30,6 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
   .setPreference(AlignParameters, true)
   .setPreference(DoubleIndentClassDeclaration, true)
-  .setPreference(PreserveDanglingCloseParenthesis, true)
   .setPreference(RewriteArrowSymbols, true)
 
 libraryDependencies ++= {
@@ -53,7 +50,5 @@ libraryDependencies ++= {
     ,"org.scalatest"     %% "scalatest"                         % scalaTestV % "test"
   )
 }
-
-Seq(bintraySettings:_*)
 
 Seq(Revolver.settings: _*)

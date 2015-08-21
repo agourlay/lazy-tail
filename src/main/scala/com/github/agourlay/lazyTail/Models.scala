@@ -9,13 +9,14 @@ import de.heikoseeberger.akkasse.ServerSentEvent
 import spray.json._
 
 case class LazyLog(
-  threadName: String,
-  level: LogLevel.LogLevelType,
-  message: String,
+  threadName:       String,
+  level:            LogLevel.LogLevelType,
+  message:          String,
   formattedMessage: String,
-  loggerName: String,
-  timestamp: Long,
-  htmlLog: String)
+  loggerName:       String,
+  timestamp:        Long,
+  htmlLog:          String
+)
 
 object LazyLog extends JsonSupport {
 
@@ -48,14 +49,15 @@ object LazyLog extends JsonSupport {
 
   private val toJson = implicitly[RootJsonFormat[LazyLog]]
 
-  implicit def flowEventToSseMessage(log: LazyLog): ServerSentEvent = ServerSentEvent(PrettyPrinter(toJson.write(log)), "log")
+  def flowEventToSseMessage(log: LazyLog): ServerSentEvent = ServerSentEvent(PrettyPrinter(toJson.write(log)), "log")
 }
 
 case class ExceptionInfo(
-    message: String,
-    className: String,
+    message:    String,
+    className:  String,
     stacktrace: Vector[String],
-    cause: Option[ExceptionInfo] = None) {
+    cause:      Option[ExceptionInfo] = None
+) {
 
   def accumulateCauses(): Vector[ExceptionInfo] = {
     def loopAccumulateCauses(eInfo: ExceptionInfo, causes: Vector[ExceptionInfo]): Vector[ExceptionInfo] =

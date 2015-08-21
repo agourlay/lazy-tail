@@ -1,14 +1,12 @@
-package com.github.agourlay
+package com.github.agourlay.lazyTail
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import akka.testkit.TestKit
-import com.github.agourlay.lazyTail.{ LazyTail, LogLevel }
 import org.scalatest._
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.slf4j.LoggerFactory
-import spray.json.{ JsString, JsonParser }
 
 class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLike with Matchers with ScalaFutures with Eventually with BeforeAndAfterAll {
   def this() = this(ActorSystem("MySpec"))
@@ -24,16 +22,14 @@ class SourceSpec(_system: ActorSystem) extends TestKit(_system) with WordSpecLik
       implicit lazy val mat = ActorMaterializer()
       implicit lazy val ec = system.dispatcher
 
-      val futureSource = LazyTail().source(LogLevel.INFO)
-      whenReady(futureSource) { s ⇒
-        val process = s.runWith(Sink.head)
+      val process = LazyTail().source(LogLevel.INFO).runWith(Sink.head)
 
-        logger.info("catch me if you can")
+      logger.info("catch me if you can")
 
-        whenReady(process) { log ⇒
-          JsonParser(log.data).asJsObject.getFields("formattedMessage").head should equal(JsString("catch me if you can"))
-        }
+      whenReady(process) { log ⇒
+        log.formattedMessage should equal("catch me if you can")
       }
+
     }
   }
 }

@@ -2,6 +2,7 @@ package com.github.agourlay.lazyTail.actors
 
 import akka.actor.{ Actor, ActorRef, Props }
 import com.github.agourlay.lazyTail.{ LazyLog, LogLevel }
+import lazyTail.actors.LogPublisher
 
 class DispatcherActor extends Actor {
   import DispatcherActorProtocol._

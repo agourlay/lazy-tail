@@ -13,11 +13,10 @@ import akka.pattern._
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol.{ AskLastErrors, LastErrors }
-import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
+import de.heikoseeberger.akkasse.{ WithHeartbeats, EventStreamMarshalling }
+import scala.concurrent.duration._
 
-import scala.concurrent.Future
-
-case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[ServerSentEvent, Unit]], dispatcherActor: ActorRef)(implicit system: ActorSystem)
+case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Source[LazyLog, Unit], dispatcherActor: ActorRef)(implicit system: ActorSystem)
     extends Directives with EventStreamMarshalling with JsonSupport {
 
   implicit val ec = system.dispatcher
@@ -31,8 +30,10 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[Server
         //TODO serialize directly as enum as in Spray
         parameters('minLevel ? "INFO") { param: String ⇒
           complete {
-            LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest -> s"$param is not a valid LogLevel")) {
+            LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest → s"$param is not a valid LogLevel")) {
               sourceOfLogs(_)
+                .map(LazyLog.flowEventToSseMessage)
+                .via(WithHeartbeats(1.second))
             }
           }
         }
@@ -44,7 +45,8 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[Server
             complete(
               HttpResponse(
                 //TODO so lazy...try Twirl or Scalate
-                entity = HttpEntity(MediaTypes.`text/html`,
+                entity = HttpEntity(
+                  MediaTypes.`text/html`,
                   s"""
                       <html>
                       <head>
@@ -57,13 +59,15 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Future[Source[Server
                       </div>
                       </body>
                       </html>
-                     """))
+                     """
+                )
+              )
             )
           }
         } ~
           path("lastErrors") {
             onSuccess((dispatcherActor ? AskLastErrors).mapTo[LastErrors]) { container: LastErrors ⇒
-              complete(ToResponseMarshallable(OK -> container.lastErrors))
+              complete(ToResponseMarshallable(OK → container.lastErrors))
             }
           }
       } ~

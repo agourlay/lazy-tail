@@ -1,6 +1,5 @@
-package com.github.agourlay
+package com.github.agourlay.lazyTail
 
-import com.github.agourlay.lazyTail.LazyTail
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.slf4j.LoggerFactory

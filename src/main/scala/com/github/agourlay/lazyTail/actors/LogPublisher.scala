@@ -1,18 +1,34 @@
-package com.github.agourlay.lazyTail.actors
+package lazyTail.actors
 
 import akka.actor.Props
-import com.github.agourlay.lazyTail.{ JsonSupport, LazyLog, LogLevel }
-import de.heikoseeberger.akkasse._
+import akka.stream.actor.ActorPublisher
+import akka.stream.actor.ActorPublisherMessage.{ Cancel, Request }
+import com.github.agourlay.lazyTail.{ LazyLog, LogLevel }
 
-import scala.concurrent.duration.DurationInt
+class LogPublisher(minLogLevel: LogLevel.LogLevelType) extends ActorPublisher[LazyLog] {
 
-class LogPublisher(minLogLevel: LogLevel.LogLevelType) extends EventPublisher[LazyLog](500, 1 second) with JsonSupport {
+  val logs = scala.collection.mutable.Queue.empty[LazyLog]
 
-  override protected def receiveEvent = {
+  override def receive: Receive = {
     case log: LazyLog ⇒
       if (log.level >= minLogLevel) {
-        onEvent(log)
+        // drop old logs if Queue gets too big
+        if (logs.size > 500) logs.dequeue()
+        logs.enqueue(log)
+        pushToSub()
       }
+
+    case Request(_) ⇒
+      pushToSub()
+
+    case Cancel ⇒
+      context.stop(self)
+  }
+
+  def pushToSub() {
+    while (totalDemand > 0 && logs.nonEmpty) {
+      onNext(logs.dequeue())
+    }
   }
 }
 

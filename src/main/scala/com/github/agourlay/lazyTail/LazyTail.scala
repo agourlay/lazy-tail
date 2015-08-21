@@ -11,10 +11,9 @@ import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol.LogPublisherRef
 import com.github.agourlay.lazyTail.actors.{ DispatcherActor, DispatcherActorProtocol, RestAPI }
-import de.heikoseeberger.akkasse.ServerSentEvent
 import org.slf4j.LoggerFactory
-
-import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 /**
  * LazyTail
@@ -23,13 +22,14 @@ import scala.concurrent.Future
  */
 case class LazyTail(loggerName: String = "ROOT") {
 
-  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[ServerSentEvent, Unit]] = {
+  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, Unit] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
-    (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[ServerSentEvent](logPublisher.ref))
+    val f = (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
+      Source(ActorPublisher[LazyLog](logPublisher.ref))
     }
+    Await.result(f, 5.seconds)
   }
 
   /**
@@ -66,15 +66,16 @@ case class LazyTail(loggerName: String = "ROOT") {
    * @param system akka-system running the Source
    * @return Future of Source[Log, Unit]
    */
-  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Future[Source[ServerSentEvent, Unit]] = {
+  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, Unit] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
     val dispatcherActor = system.actorOf(DispatcherActor.props())
     LazyTailAppender(loggerName, dispatcherActor)
 
-    (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[ServerSentEvent](logPublisher.ref))
+    val f = (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
+      Source(ActorPublisher[LazyLog](logPublisher.ref))
     }
+    Await.result(f, 5.seconds)
   }
 }

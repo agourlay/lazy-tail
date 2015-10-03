@@ -36,7 +36,7 @@ lazy-tail depends on akka-http 1.0.
 resolvers += "agourlay at bintray" at "http://dl.bintray.com/agourlay/maven"
 
 libraryDependencies ++= List(
-  "com.github.agourlay" %% "lazy-tail" % "0.1.5",
+  "com.github.agourlay" %% "lazy-tail" % "0.1.6",
   ...
 )
 ```

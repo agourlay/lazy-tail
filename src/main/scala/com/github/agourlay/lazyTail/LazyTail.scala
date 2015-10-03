@@ -64,7 +64,7 @@ case class LazyTail(loggerName: String = "ROOT") {
   /**
    * Build a Future of Source[Log, Unit] publishing logs.
    * @param system akka-system running the Source
-   * @return Future of Source[Log, Unit]
+   * @return Source[LazyLog, Unit]
    */
   def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, Unit] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)

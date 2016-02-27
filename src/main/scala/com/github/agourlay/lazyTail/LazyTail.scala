@@ -2,6 +2,7 @@ package com.github.agourlay.lazyTail
 
 import java.util.concurrent.TimeUnit
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.server
 import akka.pattern._
@@ -22,24 +23,25 @@ import scala.concurrent.Await
  */
 case class LazyTail(loggerName: String = "ROOT") {
 
-  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, Unit] = {
+  private def logSource(dispatcherActor: ActorRef, minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, NotUsed] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
     val f = (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[LazyLog](logPublisher.ref))
+      Source.fromPublisher(ActorPublisher[LazyLog](logPublisher.ref))
     }
     Await.result(f, 5.seconds)
   }
 
   /**
    * Start lazyTail on provided port.
+   *
    * @param port http port
    */
   def start(port: Int): Unit = {
     implicit lazy val system = ActorSystem("lazy-tail")
     implicit lazy val mat = ActorMaterializer()
-    sys.addShutdownHook(system.shutdown())
+    sys.addShutdownHook(system.terminate())
 
     LoggerFactory.getLogger("LazyTail").info(s"Starting lazyTail on port $port")
 
@@ -52,6 +54,7 @@ case class LazyTail(loggerName: String = "ROOT") {
 
   /**
    * Build an Akka-Http Route with the lazyTail logic.
+   *
    * @param system akka-system running the Route
    * @return the Route
    */
@@ -63,10 +66,11 @@ case class LazyTail(loggerName: String = "ROOT") {
 
   /**
    * Build a Future of Source[Log, Unit] publishing logs.
+   *
    * @param system akka-system running the Source
    * @return Source[LazyLog, Unit]
    */
-  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, Unit] = {
+  def source(minLogLevel: LogLevel.LogLevelType)(implicit system: ActorSystem): Source[LazyLog, NotUsed] = {
     implicit val timeout = Timeout(5, TimeUnit.SECONDS)
     implicit val ec = system.dispatcher
 
@@ -74,7 +78,7 @@ case class LazyTail(loggerName: String = "ROOT") {
     LazyTailAppender(loggerName, dispatcherActor)
 
     val f = (dispatcherActor ? DispatcherActorProtocol.Subscribe(minLogLevel)).mapTo[LogPublisherRef].map { logPublisher ⇒
-      Source(ActorPublisher[LazyLog](logPublisher.ref))
+      Source.fromPublisher(ActorPublisher[LazyLog](logPublisher.ref))
     }
     Await.result(f, 5.seconds)
   }

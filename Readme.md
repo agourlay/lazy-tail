@@ -17,6 +17,11 @@ Here comes lazy-tail - a library exposing the logs of any host application using
 
 Start by creating an instance of the ```LazyTail``` class - as an optional argument it takes the LoggerName you want to expose. (by default "ROOT")
 
+```scala
+
+new LazyTail()
+```
+
 then 2 alternatives are currently available on a ```LazyTail``` instance:
 
 ```scala

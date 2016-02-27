@@ -1,4 +1,4 @@
-package lazyTail.actors
+package com.github.agourlay.lazyTail.actors
 
 import akka.actor.Props
 import akka.stream.actor.ActorPublisher

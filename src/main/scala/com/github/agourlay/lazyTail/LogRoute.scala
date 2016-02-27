@@ -2,21 +2,22 @@ package com.github.agourlay.lazyTail
 
 import java.util.concurrent.TimeUnit
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.CacheDirectives._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, MediaTypes }
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server._
 import akka.pattern._
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import com.github.agourlay.lazyTail.actors.DispatcherActorProtocol.{ AskLastErrors, LastErrors }
-import de.heikoseeberger.akkasse.{ WithHeartbeats, EventStreamMarshalling }
+import de.heikoseeberger.akkasse.{ ServerSentEvent, EventStreamMarshalling }
 import scala.concurrent.duration._
 
-case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Source[LazyLog, Unit], dispatcherActor: ActorRef)(implicit system: ActorSystem)
+case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Source[LazyLog, NotUsed], dispatcherActor: ActorRef)(implicit system: ActorSystem)
     extends Directives with EventStreamMarshalling with JsonSupport {
 
   implicit val ec = system.dispatcher
@@ -33,7 +34,7 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Source[LazyLog, Unit
             LogLevel.from(param.toUpperCase).fold(ToResponseMarshallable(BadRequest → s"$param is not a valid LogLevel")) {
               sourceOfLogs(_)
                 .map(LazyLog.flowEventToSseMessage)
-                .via(WithHeartbeats(1.second))
+                .keepAlive(1.second, () ⇒ ServerSentEvent.heartbeat)
             }
           }
         }
@@ -46,7 +47,7 @@ case class LogRoute(sourceOfLogs: LogLevel.LogLevelType ⇒ Source[LazyLog, Unit
               HttpResponse(
                 //TODO so lazy...try Twirl or Scalate
                 entity = HttpEntity(
-                  MediaTypes.`text/html`,
+                  ContentTypes.`text/html(UTF-8)`,
                   s"""
                       <html>
                       <head>
